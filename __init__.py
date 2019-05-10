@@ -27,6 +27,9 @@ class SpellingSkill(MycroftSkill):
 
     @intent_handler(IntentBuilder("").require("Spell").require("Word"))
     def handle_spell(self, message):
+        """ Handler for the intent match of "spell the word" and similar
+            sentences.
+        """
         word = message.data.get("Word")
         spelled_word = '; '.join(word).upper()
 
@@ -41,7 +44,7 @@ class SpellingSkill(MycroftSkill):
         # TODO: Add mouth_text(word, wrap_at_end=False) parameter and get rid
         #       of the need for deactivate_mouth_events() -- or at least handle
         #       at the Enclosure level.
-        self.enclosure.mouth_text(word+"          ")
+        self.enclosure.mouth_text(word + "          ")
         time.sleep(self.LETTERS_PER_SCREEN + len(word) * self.SEC_PER_LETTER)
         wait_while_speaking()
 
