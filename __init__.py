@@ -13,6 +13,8 @@
 # limitations under the License.
 
 import time
+import re
+
 from adapt.intent import IntentBuilder
 from mycroft import MycroftSkill, intent_handler
 from mycroft.audio import wait_while_speaking
@@ -25,12 +27,21 @@ class SpellingSkill(MycroftSkill):
     def __init__(self):
         super(SpellingSkill, self).__init__(name="SpellingSkill")
 
+    def initialize(self):
+        """ Load the regex for doing a safety match if adapt messes up. """
+        with open(self.find_resource("word.rx", "regex")) as f:
+            rx = f.read().strip()
+            self.regex = re.compile(".*{}.*".format(rx))
+
     @intent_handler(IntentBuilder("").require("Spell").require("Word"))
     def handle_spell(self, message):
         """ Handler for the intent match of "spell the word" and similar
             sentences.
         """
-        word = message.data.get("Word")
+        # Safety for bad adapt match
+        match = self.regex.match(message.data.get("utterance"))
+        word = match.groupdict()["Word"]
+
         spelled_word = '; '.join(word).upper()
 
         self.enclosure.deactivate_mouth_events()
